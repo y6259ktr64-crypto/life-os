@@ -1,4 +1,4 @@
-:root {
+\:root {
     --bg-main: #f4f4f6;
     --card-bg: #ffffff;
     --text-primary: #111113;
@@ -123,8 +123,15 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 32px;
     cursor: pointer;
+}
+
+/* Масштабирование векторных фигур */
+.square svg {
+    width: 80%;
+    height: 80%;
+    pointer-events: none;
+    display: block;
 }
 
 .square.light { background-color: var(--sq-light); }
@@ -132,14 +139,17 @@ header {
 
 .square.selected {
     background-color: var(--sq-selected) !important;
-    color: #ffffff !important;
+}
+
+.square.selected svg {
+    filter: invert(1);
 }
 
 .square.possible::after {
     content: '';
-    width: 10px;
-    height: 10px;
-    background-color: rgba(0, 0, 0, 0.3);
+    width: 12px;
+    height: 12px;
+    background-color: rgba(17, 17, 19, 0.25);
     border-radius: 50%;
 }
 
