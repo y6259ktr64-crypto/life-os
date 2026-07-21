@@ -1,5 +1,5 @@
 const tg = window.Telegram.WebApp;
-tg.expand();
+if (tg) tg.expand();
 
 const game = new Chess();
 let selectedSquare = null;
@@ -10,9 +10,172 @@ const piecesUnicode = {
     'P': '♙', 'R': '♖', 'N': '♘', 'B': '♗', 'Q': '♕', 'K': '♔'
 };
 
-// Ценность фигур для ИИ
-const pieceValues = { 'p': 10, 'r': 50, 'n': 30, 'b': 30, 'q': 90, 'k': 1000 };
+// --- ПОЗИЦИОННЫЕ ТАБЛИЦЫ ДЛЯ ИИ ---
+const pawnPST = [
+    [0,  0,  0,  0,  0,  0,  0,  0],
+    [50, 50, 50, 50, 50, 50, 50, 50],
+    [10, 10, 20, 30, 30, 20, 10, 10],
+    [ 5,  5, 10, 25, 25, 10,  5,  5],
+    [ 0,  0,  0, 20, 20,  0,  0,  0],
+    [ 5, -5,-10,  0,  0,-10, -5,  5],
+    [ 5, 10, 10,-20,-20, 10, 10,  5],
+    [0,  0,  0,  0,  0,  0,  0,  0]
+];
 
+const knightPST = [
+    [-50,-40,-30,-30,-30,-30,-40,-50],
+    [-40,-20,  0,  0,  0,  0,-20,-40],
+    [-30,  0, 10, 15, 15, 10,  0,-30],
+    [-30,  5, 15, 20, 20, 15,  5,-30],
+    [-30,  0, 15, 20, 20, 15,  0,-30],
+    [-30,  5, 10, 15, 15, 10,  5,-30],
+    [-40,-20,  0,  5,  5,  0,-20,-40],
+    [-50,-40,-30,-30,-30,-30,-40,-50]
+];
+
+const bishopPST = [
+    [-20,-10,-10,-10,-10,-10,-10,-20],
+    [-10,  0,  0,  0,  0,  0,  0,-10],
+    [-10,  0,  5, 10, 10,  5,  0,-10],
+    [-10,  5,  5, 10, 10,  5,  5,-10],
+    [-10,  0, 10, 10, 10, 10,  0,-10],
+    [-10, 10, 10, 10, 10, 10, 10,-10],
+    [-10,  5,  0,  0,  0,  0,  5,-10],
+    [-20,-10,-10,-10,-10,-10,-10,-20]
+];
+
+const rookPST = [
+    [0,  0,  0,  0,  0,  0,  0,  0],
+    [5, 10, 10, 10, 10, 10, 10,  5],
+    [-5,  0,  0,  0,  0,  0,  0, -5],
+    [-5,  0,  0,  0,  0,  0,  0, -5],
+    [-5,  0,  0,  0,  0,  0,  0, -5],
+    [-5,  0,  0,  0,  0,  0,  0, -5],
+    [-5,  0,  0,  0,  0,  0,  0, -5],
+    [0,  0,  0,  5,  5,  0,  0,  0]
+];
+
+const queenPST = [
+    [-20,-10,-10, -5, -5,-10,-10,-20],
+    [-10,  0,  0,  0,  0,  0,  0,-10],
+    [-10,  0,  5,  5,  5,  5,  0,-10],
+    [ -5,  0,  5,  5,  5,  5,  0, -5],
+    [  0,  0,  5,  5,  5,  5,  0, -5],
+    [-10,  5,  5,  5,  5,  5,  0,-10],
+    [-10,  0,  5,  0,  0,  0,  0,-10],
+    [-20,-10,-10, -5, -5,-10,-10,-20]
+];
+
+const kingPST = [
+    [-30,-40,-40,-50,-50,-40,-40,-30],
+    [-30,-40,-40,-50,-50,-40,-40,-30],
+    [-30,-40,-40,-50,-50,-40,-40,-30],
+    [-30,-40,-40,-50,-50,-40,-40,-30],
+    [-20,-30,-30,-40,-40,-30,-30,-20],
+    [-10,-20,-20,-20,-20,-20,-20,-10],
+    [20, 20,  0,  0,  0,  0, 20, 20],
+    [20, 30, 10,  0,  0, 10, 30, 20]
+];
+
+const pieceValues = {
+    'p': 100, 'n': 320, 'b': 330, 'r': 500, 'q': 900, 'k': 20000
+};
+
+// Оценка позиции для ИИ (Черные)
+function evaluateBoard(board) {
+    let totalEval = 0;
+    for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+            const piece = board[r][c];
+            if (piece) {
+                const type = piece.type;
+                let val = pieceValues[type];
+                let pstVal = 0;
+
+                if (type === 'p') pstVal = pawnPST[r][c];
+                else if (type === 'n') pstVal = knightPST[r][c];
+                else if (type === 'b') pstVal = bishopPST[r][c];
+                else if (type === 'r') pstVal = rookPST[r][c];
+                else if (type === 'q') pstVal = queenPST[r][c];
+                else if (type === 'k') pstVal = kingPST[r][c];
+
+                if (piece.color === 'b') {
+                    totalEval += (val + pstVal);
+                } else {
+                    // Для белых используем зеркальную сетку
+                    let whitePstVal = 0;
+                    if (type === 'p') whitePstVal = pawnPST[7-r][c];
+                    else if (type === 'n') whitePstVal = knightPST[7-r][c];
+                    else if (type === 'b') whitePstVal = bishopPST[7-r][c];
+                    else if (type === 'r') whitePstVal = rookPST[7-r][c];
+                    else if (type === 'q') whitePstVal = queenPST[7-r][c];
+                    else if (type === 'k') whitePstVal = kingPST[7-r][c];
+
+                    totalEval -= (val + whitePstVal);
+                }
+            }
+        }
+    }
+    return totalEval;
+}
+
+// --- АЛГОРИТМ MINIMAX С ALPHA-BETA ОТСЕЧЕНИЕМ ---
+function minimax(depth, alpha, beta, isMaximizing) {
+    if (depth === 0 || game.game_over()) {
+        return evaluateBoard(game.board());
+    }
+
+    const moves = game.moves();
+
+    if (isMaximizing) { // ИИ (Черные) стремится увеличить счет
+        let maxEval = -Infinity;
+        for (let move of moves) {
+            game.move(move);
+            let evaluation = minimax(depth - 1, alpha, beta, false);
+            game.undo();
+            maxEval = Math.max(maxEval, evaluation);
+            alpha = Math.max(alpha, evaluation);
+            if (beta <= alpha) break; // Альфа-бета отсечение
+        }
+        return maxEval;
+    } else { // Игрок (Белые) стремится уменьшить счет
+        let minEval = Infinity;
+        for (let move of moves) {
+            game.move(move);
+            let evaluation = minimax(depth - 1, alpha, beta, true);
+            game.undo();
+            minEval = Math.min(minEval, evaluation);
+            beta = Math.min(beta, evaluation);
+            if (beta <= alpha) break; // Альфа-бета отсечение
+        }
+        return minEval;
+    }
+}
+
+function getBestAIMove(depth) {
+    const moves = game.moves({ verbose: true });
+    if (moves.length === 0) return null;
+
+    // Сортировка ходов: сперва взятия (ускоряет поиск)
+    moves.sort((a, b) => (b.captured ? 1 : 0) - (a.captured ? 1 : 0));
+
+    let bestMove = null;
+    let bestValue = -Infinity;
+
+    for (let move of moves) {
+        game.move(move);
+        let boardValue = minimax(depth - 1, -Infinity, Infinity, false);
+        game.undo();
+
+        if (boardValue > bestValue) {
+            bestValue = boardValue;
+            bestMove = move;
+        }
+    }
+    return bestMove;
+}
+
+// --- ОТРЕНДЕРИТЬ ДОСКУ ---
 function renderBoard() {
     const boardEl = document.getElementById('chessboard');
     boardEl.innerHTML = '';
@@ -37,7 +200,6 @@ function renderBoard() {
                 squareEl.classList.add('selected');
             }
 
-            // Подсветка возможных ходов
             if (selectedSquare) {
                 const moves = game.moves({ square: selectedSquare, verbose: true });
                 if (moves.some(m => m.to === squareName)) {
@@ -59,7 +221,7 @@ function handleSquareClick(square) {
         const piece = game.get(square);
         if (piece && piece.color === 'w') {
             selectedSquare = square;
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
         }
     } else {
         const move = game.move({
@@ -69,14 +231,16 @@ function handleSquareClick(square) {
         });
 
         if (move) {
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
             selectedSquare = null;
             renderBoard();
 
-            // Ход ИИ через небольшую паузу
             if (!game.game_over()) {
                 setStatus('ИИ ДУМАЕТ...');
-                setTimeout(makeAIMove, 400);
+                // Небольшая задержка, чтобы UI успел обновиться
+                setTimeout(() => {
+                    makeAIMove();
+                }, 100);
             }
         } else {
             const piece = game.get(square);
@@ -86,48 +250,15 @@ function handleSquareClick(square) {
     renderBoard();
 }
 
-// Простой и быстрый ИИ (Оценка позиции + выбор лучшего хода)
 function makeAIMove() {
-    const moves = game.moves({ verbose: true });
-    if (moves.length === 0) return;
+    // Глубина расчета = 3 ходов вперед (очень оптимально по скорости и уму)
+    const bestMove = getBestAIMove(3);
 
-    let bestMove = null;
-    let bestValue = -9999;
-
-    // Сортируем и находим лучший ход для черных
-    for (let move of moves) {
-        game.move(move);
-        let boardValue = evaluateBoard(game.board());
-        game.undo();
-
-        if (boardValue > bestValue) {
-            bestValue = boardValue;
-            bestMove = move;
-        }
+    if (bestMove) {
+        game.move(bestMove);
+        if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
     }
-
-    // Если нет явно лучшего хода — случайный выбор
-    if (!bestMove) {
-        bestMove = moves[Math.floor(Math.random() * moves.length)];
-    }
-
-    game.move(bestMove);
-    if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
     renderBoard();
-}
-
-function evaluateBoard(board) {
-    let totalEvaluation = 0;
-    for (let r = 0; r < 8; r++) {
-        for (let c = 0; c < 8; c++) {
-            const piece = board[r][c];
-            if (piece) {
-                const val = pieceValues[piece.type];
-                totalEvaluation += (piece.color === 'b' ? val : -val);
-            }
-        }
-    }
-    return totalEvaluation;
 }
 
 function setStatus(text) {
@@ -136,7 +267,7 @@ function setStatus(text) {
 
 function updateStatus() {
     if (game.in_checkmate()) {
-        setStatus(game.turn() === 'w' ? 'МАТ! ИИ ПОБЕДИЛ' : 'МАТ! ТЫ ПОБЕДИЛ 🎉');
+        setStatus(game.turn() === 'w' ? 'МАТ! ИИ ПОБЕДИЛ 🤖' : 'МАТ! ТЫ ПОБЕДИЛ 🎉');
     } else if (game.in_draw()) {
         setStatus('НИЧЬЯ!');
     } else if (game.in_check()) {
@@ -149,9 +280,9 @@ function updateStatus() {
 function resetGame() {
     game.reset();
     selectedSquare = null;
-    if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
+    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
     renderBoard();
 }
 
-// Первый запуск
+// Запуск при загрузке
 renderBoard();
