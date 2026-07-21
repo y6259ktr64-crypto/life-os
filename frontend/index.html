@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Life OS</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header>
+        <div class="sub-header">ЛИЧНЫЙ ПУЛЬТ</div>
+        <h1 class="title">LIFE OS</h1>
+    </header>
+
+    <div class="card">
+        <div class="card-title">⚡️ ЭНЕРГИЯ ДНЯ</div>
+        <div class="energy-selector">
+            <button class="energy-btn" onclick="setEnergy('30%', this)">30%</button>
+            <button class="energy-btn active" onclick="setEnergy('70%', this)">70%</button>
+            <button class="energy-btn" onclick="setEnergy('100%', this)">100%</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">🎯 ГЛАВНЫЕ 3 ЗАДАЧИ</div>
+        <div id="taskList"></div>
+    </div>
+
+    <div class="grid-2">
+        <div class="card">
+            <div class="card-title">💰 ТРАТЫ</div>
+            <div style="font-size: 22px; font-weight: 800;" id="financeSum">0 ₽</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">за сегодня</div>
+        </div>
+        <div class="card">
+            <div class="card-title">💡 INBOX</div>
+            <div style="font-size: 22px; font-weight: 800;" id="inboxCount">0</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">заметок в базе</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">➕ ДОБАВИТЬ ТРАТУ</div>
+        <div class="input-group">
+            <input type="number" id="expenseInput" placeholder="Сумма в ₽">
+            <button class="btn-add" onclick="addExpense()">ОК</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">📥 БЫСТРАЯ МЫСЛЬ</div>
+        <div class="input-group">
+            <input type="text" id="noteInput" placeholder="Записать идею...">
+            <button class="btn-add" onclick="addNote()">ОК</button>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
