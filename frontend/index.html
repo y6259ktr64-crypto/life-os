@@ -3,39 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Minimal Chess AI</title>
+    <title>Pro Chess AI</title>
     <!-- Telegram SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Chess Engine Logic (chess.js) -->
+    <!-- Chess Logic -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
     <header>
-        <div class="sub-header">MINIMAL CHESS</div>
-        <h1 class="title" id="status">ТВОЙ ХОД</h1>
+        <div class="sub-header">STOCKFISH AI (3000 ELO)</div>
+        <h1 class="title" id="status">ВЫБЕРИТЕ ЦВЕТ</h1>
     </header>
+
+    <!-- Выбор цвета -->
+    <div class="card">
+        <div class="card-title">ВЫБОР ЦВЕТА</div>
+        <div class="color-selector">
+            <button class="color-btn active" id="btn-w" onclick="selectColor('w')">⚪️ Белые</button>
+            <button class="color-btn" id="btn-random" onclick="selectColor('random')">🎲 Рандом</button>
+            <button class="color-btn" id="btn-b" onclick="selectColor('b')">🖤 Черные</button>
+        </div>
+    </div>
 
     <!-- Шахматная доска -->
     <div class="board-container">
         <div id="chessboard" class="chessboard"></div>
     </div>
 
-    <!-- Информационная панель -->
-    <div class="card info-card">
-        <div class="info-item">
-            <span class="label">ИГРОК</span>
-            <span class="val">БЕЛЫЕ ⚪️</span>
-        </div>
-        <div class="divider"></div>
-        <div class="info-item">
-            <span class="label">СОПЕРНИК</span>
-            <span class="val">ИИ 🤖</span>
-        </div>
-    </div>
-
-    <!-- Управление -->
+    <!-- Кнопка Новая Игра -->
     <button class="btn-restart" onclick="resetGame()">НОВАЯ ИГРА</button>
 
     <script src="js/app.js"></script>

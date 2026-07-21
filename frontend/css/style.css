@@ -5,13 +5,13 @@
     --text-muted: #8e8e93;
     --border-color: #e0e0e5;
 
-    /* Доска */
+    /* Шахматная доска */
     --sq-light: #ffffff;
     --sq-dark: #e1e1e6;
     --sq-selected: #111113;
-    --sq-highlight: #c7c7cc;
 
     --radius-main: 18px;
+    --radius-small: 10px;
     --font-main: -apple-system, BlinkMacSystemFont, 'SF Pro Display', Roboto, sans-serif;
 }
 
@@ -35,7 +35,7 @@ body {
 header {
     width: 100%;
     max-width: 360px;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
 .sub-header {
@@ -47,10 +47,54 @@ header {
 }
 
 .title {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 800;
     margin: 4px 0 0 0;
     letter-spacing: -0.03em;
+}
+
+.card {
+    background: var(--card-bg);
+    border-radius: var(--radius-main);
+    padding: 14px;
+    border: 1px solid var(--border-color);
+    width: 100%;
+    max-width: 360px;
+    margin-bottom: 14px;
+}
+
+.card-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 10px 0;
+}
+
+/* Переключатель цвета */
+.color-selector {
+    display: flex;
+    gap: 8px;
+}
+
+.color-btn {
+    flex: 1;
+    background: var(--bg-main);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-small);
+    padding: 10px 0;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.color-btn.active {
+    background: var(--text-primary);
+    color: #ffffff;
+    border-color: var(--text-primary);
 }
 
 /* Доска */
@@ -62,7 +106,6 @@ header {
     border-radius: var(--radius-main);
     padding: 8px;
     border: 1px solid var(--border-color);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
     margin-bottom: 16px;
 }
 
@@ -72,7 +115,7 @@ header {
     grid-template-rows: repeat(8, 1fr);
     width: 100%;
     height: 100%;
-    border-radius: 12px;
+    border-radius: 10px;
     overflow: hidden;
 }
 
@@ -82,69 +125,22 @@ header {
     justify-content: center;
     font-size: 32px;
     cursor: pointer;
-    transition: background 0.15s ease;
 }
 
 .square.light { background-color: var(--sq-light); }
 .square.dark { background-color: var(--sq-dark); }
 
-/* Подсветка */
 .square.selected {
     background-color: var(--sq-selected) !important;
     color: #ffffff !important;
 }
 
-.square.possible {
-    position: relative;
-}
-
 .square.possible::after {
     content: '';
-    width: 12px;
-    height: 12px;
-    background-color: rgba(0, 0, 0, 0.25);
+    width: 10px;
+    height: 10px;
+    background-color: rgba(0, 0, 0, 0.3);
     border-radius: 50%;
-}
-
-/* Панель информации */
-.card {
-    background: var(--card-bg);
-    border-radius: var(--radius-main);
-    padding: 14px 18px;
-    border: 1px solid var(--border-color);
-    width: 100%;
-    max-width: 360px;
-    margin-bottom: 16px;
-}
-
-.info-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.info-item {
-    display: flex;
-    flex-direction: column;
-}
-
-.label {
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--text-muted);
-    letter-spacing: 0.8px;
-}
-
-.val {
-    font-size: 14px;
-    font-weight: 700;
-    margin-top: 2px;
-}
-
-.divider {
-    width: 1px;
-    height: 24px;
-    background: var(--border-color);
 }
 
 .btn-restart {
@@ -157,6 +153,5 @@ header {
     padding: 14px 0;
     font-weight: 700;
     font-size: 14px;
-    letter-spacing: 0.5px;
     cursor: pointer;
 }
